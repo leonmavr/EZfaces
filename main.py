@@ -4,25 +4,20 @@ import cv2
 from collections import OrderedDict as OD
 
 
-class faceDatasetLoader():
+class faceClassifier():
     def __init__(self):
-        self.data = []
-        self.target = []
-        self.train_set = []
-        self.pred_set = []
-        self.train_lbl = []
-        self.pred_lbl = []
+        self.data = None            # data vectors
+        self.target = None          # actual labels
+        self.train_set = OD()       # maps sample index to data and label
         # how many eigenfaces to keep - use arbitrary value for now
         self.K = 200
         # MxK matrix - each row stores the coords of each image in the eigenface space
-        self.W = []
+        self.W = None
         # mean needed for reconstruction
         self._mean = np.zeros((1, 64*64), dtype=np.float32)
         self._load_olivetti_data(self)
         self._TRAIN_SAMPLE = 1
         self._PRED_SAMPLE = 0
-        self._train_data = None
-        self._test_data = None
 
 
     def _load_olivetti_data(self, do_centre = True):
@@ -80,16 +75,7 @@ class faceDatasetLoader():
 
 
     def train(self):
-        self._subtract_mean()
-
-        #train_inds = sorted([i for i in self.train_data.keys()])
-        train_inds = [i for i,t in enumerate(self.training_or_test) if t == self._TRAIN_SAMPLE]
-        # {index: (data_vector, data_label)}, index starts from 0 
-        self.train_data = OD( # ordered dictionary
-                dict(zip(train_inds, # keys
-            zip(self.data[train_inds,:], self.target[train_inds]))) # vals
-                )
-
+        self._divide_dataset()
         # the matrix X to use for training
         X = np.array([v[0] for v in self.train_data.values()])
         # compute eig of MxN^2 matrix first instead of the N^2xN^2, N^2 >> M
@@ -106,11 +92,20 @@ class faceDatasetLoader():
         self.W = self.W[:, :self.K]
 
 
-    def divide_dataset(self, ratio = 0.85):
+    def _divide_dataset(self, ratio = 0.85):
         """Divides dataset in training and test (prediction) data"""
         if not 0 < ratio < 1:
             raise RuntimeError("Provide a ratio between 0 and 1.")
         self.training_or_test = [self._random_binary(ratio) for _ in self.data]
+        self._subtract_mean()
+
+        #train_inds = sorted([i for i in self.train_data.keys()])
+        train_inds = [i for i,t in enumerate(self.training_or_test) if t == self._TRAIN_SAMPLE]
+        # {index: (data_vector, data_label)}, index starts from 0 
+        self.train_data = OD( # ordered dictionary
+                dict(zip(train_inds, # keys
+            zip(self.data[train_inds,:], self.target[train_inds]))) # vals
+                )
 
 
     def _random_binary(self, prob_of_1 = .5) -> int:
@@ -140,7 +135,6 @@ class faceDatasetLoader():
         w_new = np.matmul(self.evec_XTX.T, x_new.T)
         w_new = w_new[:self.K]
         M = len(self.train_data)
-        np.array([v[0] for v in self.train_data.values()])
         # if not match w/ itself and match w/ one of training data else inf
         dists = [np.linalg.norm(w_new - self.W[i,:])
                 if ((np.linalg.norm(w_new - self.W[i,:]) > 0.0) and
@@ -170,9 +164,8 @@ class faceDatasetLoader():
 
 
 
-fd = faceDatasetLoader()
+fd = faceClassifier()
 fd.add_img_data(['leo_4.jpg', 'leo_2.jpg', 'leo_1.jpg', 'leo_3.jpg', 'leo_5.jpg', 'leo_0.jpg', 'leo_7.jpg'])
-fd.divide_dataset()
 fd.train()
 for _ in range(8):
     lbl_actual, i_actual = fd.get_random_image()
