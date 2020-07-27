@@ -2,6 +2,7 @@ from sklearn.datasets import fetch_olivetti_faces
 import numpy as np
 import cv2
 from collections import OrderedDict as OD
+from sklearn.metrics import classification_report
 
 
 class faceClassifier():
@@ -23,6 +24,7 @@ class faceClassifier():
         self.K = K
         # MxK matrix - each row stores the coords of each image in the eigenface space
         self.W = None
+        self.classification_report = None # obtained from benchmarking
         # mean needed for reconstruction
         self._mean = np.zeros((1, 64*64), dtype=np.float32)
         self._load_olivetti_data()
@@ -37,6 +39,7 @@ class faceClassifier():
         Mtest = len(self.test_data)
         return "Loaded %d samples in total.\n"\
             "%d for training and %d for testing." % (M, Mtrain, Mtest)
+
 
     def _load_olivetti_data(self):
         """Load the Olivetti face data and save them in the class."""
@@ -191,11 +194,23 @@ class faceClassifier():
         return x
 
 
+    def benchmark(self, imshow = False):
+        self.train()
+        lbl_actual = []
+        lbl_test = []
+        for ind_test, test_data_lbl in self.test_data.items():
+            x_actual = test_data_lbl[0]
+            lbl_actual.append(test_data_lbl[1])
+            x_test, lbl = self.classify(x_actual)
+            lbl_test.append(lbl)
+        self.classification_report = classification_report(y_true = lbl_actual, y_pred = lbl_test)
+
 
 fd = faceClassifier()
 fd.add_img_data(['leo_4.jpg', 'leo_2.jpg', 'leo_1.jpg', 'leo_3.jpg', 'leo_5.jpg', 'leo_0.jpg', 'leo_7.jpg'])
 fd.train()
 fd.get_test_sample()
+fd.benchmark()
 for _ in range(8):
     #lbl_actual, i_actual = fd.get_random_image()
     x_actual, lbl_actual = fd.get_test_sample()
