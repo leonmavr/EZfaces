@@ -3,11 +3,12 @@ import numpy as np
 import cv2
 from collections import OrderedDict as OD
 from sklearn.metrics import classification_report
+from matplotlib import pyplot as plt
 
 
 class faceClassifier():
     def __init__(self, ratio = 0.85, K = 200):
-        """__init__.
+        """__init__. Class constructor.
 
         Parameters
         ----------
@@ -30,7 +31,6 @@ class faceClassifier():
         self._load_olivetti_data()
         self._TRAIN_SAMPLE = 1
         self._PRED_SAMPLE = 0
-        self._divide_dataset(ratio = ratio)
 
 
     def __str__(self):
@@ -113,7 +113,7 @@ class faceClassifier():
         self.W = self.W[:, :self.K]
 
 
-    def _divide_dataset(self, ratio = 0.85):
+    def divide_dataset(self, ratio = 0.85):
         """Divides dataset in training and test (prediction) data"""
         if not 0 < ratio < 1:
             raise RuntimeError("Provide a ratio between 0 and 1.")
@@ -194,24 +194,56 @@ class faceClassifier():
         return x
 
 
-    def benchmark(self, imshow = False):
+    def benchmark(self, imshow = False, wait_time = 0.5, which_labels = []):
+        """benchmark. Iterates over each test sample and classifies it.
+        Genrates a classification report with all the classification metrics.
+
+        Parameters
+        ----------
+        imshow :
+            If True, show the actual vs predicted image, each for some times.
+        wait_time :
+            How many seconds to show each actual vs predicted image for.
+        which_labels :
+            Which labels to show. Useful when a new label was just added
+        """
         self.train()
         lbl_actual = []
         lbl_test = []
         for ind_test, test_data_lbl in self.test_data.items():
+            # if we want to show only certain labels
+            if len(which_labels) != 0:
+                if test_data_lbl[1] not in which_labels:
+                    print(test_data_lbl[1])
+                    continue 
             x_actual = test_data_lbl[0]
             lbl_actual.append(test_data_lbl[1])
             x_test, lbl = self.classify(x_actual)
             lbl_test.append(lbl)
-        self.classification_report = classification_report(y_true = lbl_actual, y_pred = lbl_test)
+            if imshow:
+                fig=plt.figure(figsize=(64, 64))
+                cols, rows = 2, 1
+                ax1 = fig.add_subplot(rows, cols, 1)
+                ax1.title.set_text('actual: %d' % test_data_lbl[1])
+                plt.imshow(self.vec2img(x_actual))
+                ax2 = fig.add_subplot(rows, cols, 2)
+                ax2.title.set_text('predicted: %d' % lbl)
+                plt.imshow(self.vec2img(x_test))
+                plt.show(block=False)
+                plt.pause(wait_time)
+                plt.close()
+        self.classification_report = classification_report(y_true = lbl_actual,
+                y_pred = lbl_test)
 
 
 fd = faceClassifier()
 fd.add_img_data(['leo_4.jpg', 'leo_2.jpg', 'leo_1.jpg', 'leo_3.jpg', 'leo_5.jpg', 'leo_0.jpg', 'leo_7.jpg'])
+fd.divide_dataset()
 fd.train()
 fd.get_test_sample()
-fd.benchmark()
-for _ in range(8):
+fd.benchmark(imshow = True, which_labels = [38,39,40])
+print(fd.classification_report)
+for _ in range(0):
     #lbl_actual, i_actual = fd.get_random_image()
     x_actual, lbl_actual = fd.get_test_sample()
     x_pred, lbl_pred = fd.classify(x_actual)
