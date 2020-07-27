@@ -96,12 +96,12 @@ class faceClassifier():
         """Divides dataset in training and test (prediction) data"""
         if not 0 < ratio < 1:
             raise RuntimeError("Provide a ratio between 0 and 1.")
-        self.training_or_test = [self._random_binary(ratio) for _ in self.data]
+        training_or_test = [self._random_binary(ratio) for _ in self.data]
         self._subtract_mean()
 
         #train_inds = sorted([i for i in self.train_data.keys()])
-        train_inds = [i for i,t in enumerate(self.training_or_test) if t == self._TRAIN_SAMPLE]
-        test_inds = [i for i,t in enumerate(self.training_or_test) if t == self._PRED_SAMPLE]
+        train_inds = [i for i,t in enumerate(training_or_test) if t == self._TRAIN_SAMPLE]
+        test_inds = [i for i,t in enumerate(training_or_test) if t == self._PRED_SAMPLE]
         # {index: (data_vector, data_label)}, index starts from 0 
         self.train_data = OD(                                       # ordered dict
                 dict(zip(train_inds,                                # keys
@@ -128,18 +128,17 @@ class faceClassifier():
 
     def classify(self, x_new:np.array) -> tuple:
         train_inds = sorted([i for i in self.train_data.keys()])
+        M = len(train_inds)
         # find eigenface space coordinates
         w_new = np.matmul(self.evec_XTX.T, x_new.T)
         w_new = w_new[:self.K]
-        M = len(self.train_data)
         # if not match w/ itself and match w/ one of training data else inf
         dists = [np.linalg.norm(w_new - self.W[i,:])
-                if ((np.linalg.norm(w_new - self.W[i,:]) > 0.0) and
-                (self.training_or_test[train_inds[i]] == self._TRAIN_SAMPLE)) else
+                if (np.linalg.norm(w_new - self.W[i,:]) > 0.0) else
                 np.infty
                 for i in range(M)]
-        return (self.train_data[train_inds[np.argmin(dists)]][0], # data 
-                self.train_data[train_inds[np.argmin(dists)]][1]) # label 
+        return (self.train_data[train_inds[np.argmin(dists)]][0], # data
+                self.train_data[train_inds[np.argmin(dists)]][1]) # label
 
 
     def vec2img(self, x:list):
