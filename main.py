@@ -5,13 +5,13 @@ from collections import OrderedDict as OD
 
 
 class faceClassifier():
-    def __init__(self):
+    def __init__(self, ratio = 0.85, K = 200):
         self.data = None            # data vectors
         self.target = None          # actual labels
         self.train_data = OD()      # maps sample index to data and label
         self.test_data = OD()       # maps sample index to data and label
         # how many eigenfaces to keep - use arbitrary value for now
-        self.K = 200
+        self.K = K
         # MxK matrix - each row stores the coords of each image in the eigenface space
         self.W = None
         # mean needed for reconstruction
@@ -19,6 +19,7 @@ class faceClassifier():
         self._load_olivetti_data(self)
         self._TRAIN_SAMPLE = 1
         self._PRED_SAMPLE = 0
+        self._divide_dataset(ratio = ratio)
 
 
     def _load_olivetti_data(self, do_centre = True):
@@ -75,7 +76,6 @@ class faceClassifier():
 
 
     def train(self):
-        self._divide_dataset()
         # the matrix X to use for training
         X = np.array([v[0] for v in self.train_data.values()])
         # compute eig of MxN^2 matrix first instead of the N^2xN^2, N^2 >> M
