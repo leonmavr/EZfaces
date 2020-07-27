@@ -8,7 +8,8 @@ class faceClassifier():
     def __init__(self):
         self.data = None            # data vectors
         self.target = None          # actual labels
-        self.train_set = OD()       # maps sample index to data and label
+        self.train_data = OD()      # maps sample index to data and label
+        self.test_data = OD()       # maps sample index to data and label
         # how many eigenfaces to keep - use arbitrary value for now
         self.K = 200
         # MxK matrix - each row stores the coords of each image in the eigenface space
@@ -71,7 +72,6 @@ class faceClassifier():
 
         # subtract mean image from dataset
         self.data = np.array(self.data)
-        #self._subtract_mean()
 
 
     def train(self):
@@ -101,10 +101,15 @@ class faceClassifier():
 
         #train_inds = sorted([i for i in self.train_data.keys()])
         train_inds = [i for i,t in enumerate(self.training_or_test) if t == self._TRAIN_SAMPLE]
+        test_inds = [i for i,t in enumerate(self.training_or_test) if t == self._PRED_SAMPLE]
         # {index: (data_vector, data_label)}, index starts from 0 
-        self.train_data = OD( # ordered dictionary
-                dict(zip(train_inds, # keys
+        self.train_data = OD(                                       # ordered dict
+                dict(zip(train_inds,                                # keys
             zip(self.data[train_inds,:], self.target[train_inds]))) # vals
+                )
+        self.test_data = OD(                                        # ordered dict
+                dict(zip(test_inds,                                 # keys
+            zip(self.data[test_inds,:], self.target[test_inds])))   # vals
                 )
 
 
@@ -114,19 +119,11 @@ class faceClassifier():
         return np.round(np.random.uniform(.5, 1.5) - 1 + prob_of_1).astype(np.uint8)
 
 
-    def get_random_image(self) -> tuple:
-        """get_random_image.
-        Fetches random prediction image and its label from existing data
-
-        Returns
-        -------
-        tuple
-            containing image label and its index in self.data
-        """
-        i = np.random.randint(0, len(self.data))
-        while self.training_or_test[i] == self._TRAIN_SAMPLE:
-            i = np.random.randint(0, len(self.data))
-        return self.target[i], i
+    def get_test_sample(self) -> tuple:
+        Ntest = len(self.test_data)
+        n = np.random.randint(0, Ntest)
+        test_ind = [k for k in self.test_data.keys()][n]
+        return self.test_data[test_ind] # data, label
 
 
     def classify(self, x_new:np.array) -> tuple:
@@ -141,8 +138,8 @@ class faceClassifier():
                 (self.training_or_test[train_inds[i]] == self._TRAIN_SAMPLE)) else
                 np.infty
                 for i in range(M)]
-        return (self.train_data[train_inds[np.argmin(dists)]][1], # label
-                self.train_data[train_inds[np.argmin(dists)]][0]) # data
+        return (self.train_data[train_inds[np.argmin(dists)]][0], # data 
+                self.train_data[train_inds[np.argmin(dists)]][1]) # label 
 
 
     def vec2img(self, x:list):
@@ -167,12 +164,13 @@ class faceClassifier():
 fd = faceClassifier()
 fd.add_img_data(['leo_4.jpg', 'leo_2.jpg', 'leo_1.jpg', 'leo_3.jpg', 'leo_5.jpg', 'leo_0.jpg', 'leo_7.jpg'])
 fd.train()
+fd.get_test_sample()
 for _ in range(8):
-    lbl_actual, i_actual = fd.get_random_image()
-    x_actual = fd.data[i_actual]
-    lbl_pred, x_pred = fd.classify(x_actual)
+    #lbl_actual, i_actual = fd.get_random_image()
+    x_actual, lbl_actual = fd.get_test_sample()
+    x_pred, lbl_pred = fd.classify(x_actual)
     print("act: %d, pred: %d" %(lbl_actual, lbl_pred))
-    cv2.imshow("", fd.vec2img(fd.data[i_actual]))
+    cv2.imshow("", fd.vec2img(x_actual))
     cv2.waitKey(500)
     cv2.destroyAllWindows()
     cv2.imshow("", fd.vec2img(x_pred))
