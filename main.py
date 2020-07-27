@@ -6,6 +6,15 @@ from collections import OrderedDict as OD
 
 class faceClassifier():
     def __init__(self, ratio = 0.85, K = 200):
+        """__init__.
+
+        Parameters
+        ----------
+        ratio :
+            How much of the total data to use for training (0 to 1)
+        K :
+            How many eigenface space base vectors to keep in order to express each image
+        """
         self.data = None            # data vectors
         self.target = None          # actual labels
         self.train_data = OD()      # maps sample index to data and label
@@ -16,13 +25,21 @@ class faceClassifier():
         self.W = None
         # mean needed for reconstruction
         self._mean = np.zeros((1, 64*64), dtype=np.float32)
-        self._load_olivetti_data(self)
+        self._load_olivetti_data()
         self._TRAIN_SAMPLE = 1
         self._PRED_SAMPLE = 0
         self._divide_dataset(ratio = ratio)
 
 
-    def _load_olivetti_data(self, do_centre = True):
+    def __str__(self):
+        M = len(self.data)
+        Mtrain = len(self.train_data)
+        Mtest = len(self.test_data)
+        return "Loaded %d samples in total.\n"\
+            "%d for training and %d for testing." % (M, Mtrain, Mtest)
+
+    def _load_olivetti_data(self):
+        """Load the Olivetti face data and save them in the class."""
         data, target = fetch_olivetti_faces(return_X_y = True)
         # data as floating vectors of length 64^2, ranging from 0 to 1
         self.data = np.array(data)
@@ -45,7 +62,7 @@ class faceClassifier():
 
 
     def add_img_data(self, fpaths = [], from_webcam = False):
-        """add_img_data.
+        """add_img_data. Adds data and their labels to existing database.
 
         Parameters
         ----------
@@ -76,6 +93,7 @@ class faceClassifier():
 
 
     def train(self):
+        """ Find the coordinates of each training image in the eigenface space """
         # the matrix X to use for training
         X = np.array([v[0] for v in self.train_data.values()])
         # compute eig of MxN^2 matrix first instead of the N^2xN^2, N^2 >> M
@@ -99,7 +117,6 @@ class faceClassifier():
         training_or_test = [self._random_binary(ratio) for _ in self.data]
         self._subtract_mean()
 
-        #train_inds = sorted([i for i in self.train_data.keys()])
         train_inds = [i for i,t in enumerate(training_or_test) if t == self._TRAIN_SAMPLE]
         test_inds = [i for i,t in enumerate(training_or_test) if t == self._PRED_SAMPLE]
         # {index: (data_vector, data_label)}, index starts from 0 
@@ -120,6 +137,7 @@ class faceClassifier():
 
 
     def get_test_sample(self) -> tuple:
+        """ Get random training sample and its label. Returns (data vector, label) """
         Ntest = len(self.test_data)
         n = np.random.randint(0, Ntest)
         test_ind = [k for k in self.test_data.keys()][n]
@@ -127,12 +145,24 @@ class faceClassifier():
 
 
     def classify(self, x_new:np.array) -> tuple:
+        """classify. Classify an input data vector.
+
+        Parameters
+        ----------
+        x_new : np.array
+            Data vector 
+
+        Returns
+        -------
+        tuple
+            containing the predicted data vector and its label (data, label)
+        """
         train_inds = sorted([i for i in self.train_data.keys()])
         M = len(train_inds)
         # find eigenface space coordinates
         w_new = np.matmul(self.evec_XTX.T, x_new.T)
         w_new = w_new[:self.K]
-        # if not match w/ itself and match w/ one of training data else inf
+        # if not match w/ itself else inf
         dists = [np.linalg.norm(w_new - self.W[i,:])
                 if (np.linalg.norm(w_new - self.W[i,:]) > 0.0) else
                 np.infty
@@ -142,12 +172,14 @@ class faceClassifier():
 
 
     def vec2img(self, x:list):
+        """Converts an 1D data vector stored in the class to image."""
         x = np.array(x) + self._mean
         x = np.reshape(255*x, (64,64))
         return np.asarray(x, np.uint8)
 
 
     def img2vec(self, im) -> np.ndarray:
+        """Converts an input greyscale image to an 1D data vector."""
         if not len(im.shape) == 2:
             raise RuntimeError("Provide a greyscale image as input.")
         x = np.asarray(cv2.resize(im, dsize=(64,64)), np.float32).ravel()
