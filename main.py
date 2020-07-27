@@ -64,6 +64,25 @@ class faceClassifier():
         self.data = np.matmul(C, self.data)
 
 
+    def _read_from_webcam(self):
+        cap = cv2.VideoCapture(0)
+        while True:
+            # Capture frame-by-frame
+            _, frame = cap.read()
+            grey = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            min_shape = min(grey.shape)
+            cv2.rectangle( frame, (0,0), (int(3*min_shape/4),int(3*min_shape/4)), (0,255,0), thickness = 4)
+            cv2.imshow('frame',frame)
+            if cv2.waitKey(10) & 0xff == ord('q'):
+                break
+            elif cv2.waitKey(10) & 0xff == ord('p')
+                # TODO: append rectangle area to class data
+                pass
+
+        cap.release()
+        cv2.destroyAllWindows()
+
+
     def add_img_data(self, fpaths = [], from_webcam = False):
         """add_img_data. Adds data and their labels to existing database.
 
@@ -88,8 +107,7 @@ class faceClassifier():
             self.data = np.array([*self.data, np.array(im, dtype=np.float32)])
         if from_webcam:
             #TODO: capture webcam, populate self.data, self.target etc.
-            raise NotImplementedError(
-                    "Capturing webcam data not supported yet")
+            self._read_from_webcam()
 
         # subtract mean image from dataset
         self.data = np.array(self.data)
@@ -200,12 +218,12 @@ class faceClassifier():
 
         Parameters
         ----------
-        imshow :
+        imshow : bool
             If True, show the actual vs predicted image, each for some times.
-        wait_time :
+        wait_time : float
             How many seconds to show each actual vs predicted image for.
-        which_labels :
-            Which labels to show. Useful when a new label was just added
+        which_labels : list
+            Which labels to show. Useful when a new label was just added.
         """
         self.train()
         lbl_actual = []
@@ -214,8 +232,7 @@ class faceClassifier():
             # if we want to show only certain labels
             if len(which_labels) != 0:
                 if test_data_lbl[1] not in which_labels:
-                    print(test_data_lbl[1])
-                    continue 
+                    continue
             x_actual = test_data_lbl[0]
             lbl_actual.append(test_data_lbl[1])
             x_test, lbl = self.classify(x_actual)
@@ -232,14 +249,14 @@ class faceClassifier():
                 plt.show(block=False)
                 plt.pause(wait_time)
                 plt.close()
-        self.classification_report = classification_report(y_true = lbl_actual,
-                y_pred = lbl_test)
+        if len(lbl_actual) != 0 and len(lbl_test) != 0:
+            self.classification_report = classification_report(y_true = lbl_actual,
+                    y_pred = lbl_test)
 
 
 fd = faceClassifier()
-fd.add_img_data(['leo_4.jpg', 'leo_2.jpg', 'leo_1.jpg', 'leo_3.jpg', 'leo_5.jpg', 'leo_0.jpg', 'leo_7.jpg'])
+fd.add_img_data(['leo_4.jpg', 'leo_2.jpg', 'leo_1.jpg', 'leo_3.jpg', 'leo_5.jpg', 'leo_0.jpg', 'leo_7.jpg'], True)
 fd.divide_dataset()
-fd.train()
 fd.get_test_sample()
 fd.benchmark(imshow = True, which_labels = [38,39,40])
 print(fd.classification_report)
