@@ -64,21 +64,34 @@ class faceClassifier():
         self.data = np.matmul(C, self.data)
 
 
-    def _read_from_webcam(self):
+    def _read_from_webcam(self, new_label):
+        """Takes face snapshots from webcam. Pass the new label of the subject
+        being photographed."""
+        print("Position your face in the green box.\n"
+                "Press p to capture your face profile from slightly different angles,\n"
+                "or q to quit.")
+        # try to open default webcam
         cap = cv2.VideoCapture(0)
         while True:
-            # Capture frame-by-frame
+            # Capture frame by frame
             _, frame = cap.read()
             grey = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             min_shape = min(grey.shape)
-            cv2.rectangle( frame, (0,0), (int(3*min_shape/4),int(3*min_shape/4)), (0,255,0), thickness = 4)
+            cv2.rectangle( frame, (0,0), (int(3*min_shape/4),
+                int(3*min_shape/4)), (0,255,0), thickness = 4)
             cv2.imshow('frame',frame)
-            if cv2.waitKey(10) & 0xff == ord('q'):
+            k = cv2.waitKey(10) & 0xff
+            if k == ord('q'):
                 break
-            elif cv2.waitKey(10) & 0xff == ord('p')
-                # TODO: append rectangle area to class data
-                pass
-
+            elif k == ord('p'):
+                im_cropped = grey[:int(3*min_shape/4), :int(3*min_shape/4)]
+                cv2.destroyAllWindows()
+                cv2.imshow("new data", im_cropped)
+                cv2.waitKey(1500)
+                cv2.destroyWindow("new data")
+                x = self.img2vec(im_cropped)
+                self.data = np.array([*self.data, np.array(x, dtype=np.float32)])
+                self.target = np.append(self.target, new_label)
         cap.release()
         cv2.destroyAllWindows()
 
@@ -106,11 +119,9 @@ class faceClassifier():
             im = im/255
             self.data = np.array([*self.data, np.array(im, dtype=np.float32)])
         if from_webcam:
-            #TODO: capture webcam, populate self.data, self.target etc.
-            self._read_from_webcam()
-
-        # subtract mean image from dataset
+            self._read_from_webcam(new_label = target_new)
         self.data = np.array(self.data)
+        import pdb; pdb.set_trace()
 
 
     def train(self):
