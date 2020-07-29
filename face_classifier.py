@@ -121,7 +121,6 @@ class faceClassifier():
         if from_webcam:
             self._read_from_webcam(new_label = target_new)
         self.data = np.array(self.data)
-        import pdb; pdb.set_trace()
 
 
     def train(self):
