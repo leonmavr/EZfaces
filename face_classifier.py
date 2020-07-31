@@ -4,31 +4,47 @@ import cv2
 from collections import OrderedDict as OD
 from sklearn.metrics import classification_report
 from matplotlib import pyplot as plt
+import pickle as pkl
+import os
+import time
 
 
 class faceClassifier():
-    def __init__(self, ratio = 0.85, K = 200):
+    def __init__(self, ratio = 0.85, K = 200, data_pkl = None, target_pkl = None):
         """__init__. Class constructor.
 
         Parameters
         ----------
+        data_pkl :
+            Pickle serialised file that contains data (see export method)
+        target_pkl :
+            Pickle serialised file that contains label (see export method)
         ratio :
             How much of the total data to use for training (0 to 1)
         K :
             How many eigenface space base vectors to keep in order to express each image
         """
-        self.data = None            # data vectors
-        self.target = None          # actual labels
+        if data_pkl is not None:
+            with open(data_pkl, 'rb') as f:
+                self.data = pkl.load(f)
+        else:
+            self.data = None        # data vectors
+        if target_pkl is not None:
+            with open(target_pkl, 'rb') as f:
+                self.target = pkl.load(f)
+        else:
+            self.target = None      # data vectors
         self.train_data = OD()      # maps sample index to data and label
         self.test_data = OD()       # maps sample index to data and label
-        # how many eigenfaces to keep - use arbitrary value for now
+        # how many eigenfaces to keep
         self.K = K
         # MxK matrix - each row stores the coords of each image in the eigenface space
         self.W = None
         self.classification_report = None # obtained from benchmarking
         # mean needed for reconstruction
         self._mean = np.zeros((1, 64*64), dtype=np.float32)
-        self._load_olivetti_data()
+        if self.data is None and self.target is None: # no pre-loaded data
+            self._load_olivetti_data()
         self._TRAIN_SAMPLE = 1
         self._PRED_SAMPLE = 0
 
@@ -64,14 +80,15 @@ class faceClassifier():
         self.data = np.matmul(C, self.data)
 
 
-    def _read_from_webcam(self, new_label):
+    def _read_from_webcam(self, new_label, stream = 0):
         """Takes face snapshots from webcam. Pass the new label of the subject
         being photographed."""
         print("Position your face in the green box.\n"
                 "Press p to capture your face profile from slightly different angles,\n"
                 "or q to quit.")
-        # try to open default webcam
-        cap = cv2.VideoCapture(0)
+        time.sleep(3)
+        # if stream == 0, try to open default webcam, else video from path
+        cap = cv2.VideoCapture(stream)
         while True:
             # Capture frame by frame
             _, frame = cap.read()
@@ -121,11 +138,11 @@ class faceClassifier():
         if from_webcam:
             self._read_from_webcam(new_label = target_new)
         self.data = np.array(self.data)
-        import pdb; pdb.set_trace()
 
 
     def train(self):
         """ Find the coordinates of each training image in the eigenface space """
+        self._divide_dataset()
         # the matrix X to use for training
         X = np.array([v[0] for v in self.train_data.values()])
         # compute eig of MxN^2 matrix first instead of the N^2xN^2, N^2 >> M
@@ -142,7 +159,7 @@ class faceClassifier():
         self.W = self.W[:, :self.K]
 
 
-    def divide_dataset(self, ratio = 0.85):
+    def _divide_dataset(self, ratio = 0.85):
         """Divides dataset in training and test (prediction) data"""
         if not 0 < ratio < 1:
             raise RuntimeError("Provide a ratio between 0 and 1.")
@@ -182,7 +199,7 @@ class faceClassifier():
         Parameters
         ----------
         x_new : np.array
-            Data vector 
+            Data vector
 
         Returns
         -------
@@ -291,3 +308,14 @@ class faceClassifier():
         if len(lbl_actual) != 0 and len(lbl_test) != 0:
             self.classification_report = classification_report(y_true = lbl_actual,
                     y_pred = lbl_test)
+
+
+    def export(self, dest_folder = '/tmp'):
+        try:
+            with open(os.path.join(dest_folder, 'data.pkl'), 'wb') as f:
+                pkl.dump(self.data, f)
+            with open(os.path.join(dest_folder, 'target.pkl'), 'wb') as f:
+                pkl.dump(self.target, f)
+            print("Wrote data and target as .pkl at:\n%s" % dest_folder)
+        except Exception as e:
+            print(e)
