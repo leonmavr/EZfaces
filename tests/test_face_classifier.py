@@ -25,7 +25,7 @@ class TestUM(unittest.TestCase):
 
 
     def test_train_with_subject(self):
-        fpaths_images = glob.glob(os.path.join(this_script_folder, 'iimages_yale', 'subject03*png'))
+        fpaths_images = glob.glob(os.path.join(this_script_folder, 'images_yale', 'subject03*png'))
         fc = faceClassifier()
         fc.add_img_data(fpaths_images)
         # data stored as 64*64 row vectors
