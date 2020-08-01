@@ -29,5 +29,5 @@ jobs:
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Run and evaluate all unit tests
       run: |
-        python tests/*.py | grep FAILED && exit 1 
+        python tests/*.py | grep FAILED && exit 1 || exit 0
 
