@@ -33,7 +33,7 @@ class faceClassifier():
             with open(target_pkl, 'rb') as f:
                 self.target = pkl.load(f)
         else:
-            self.target = None      # data vectors
+            self.target = None      # label (ground truth) vectors
         self.train_data = OD()      # maps sample index to data and label
         self.test_data = OD()       # maps sample index to data and label
         # how many eigenfaces to keep
