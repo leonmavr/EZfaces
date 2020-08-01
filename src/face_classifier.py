@@ -15,14 +15,14 @@ class faceClassifier():
 
         Parameters
         ----------
-        data_pkl :
-            Pickle serialised file that contains data (see export method)
-        target_pkl :
-            Pickle serialised file that contains label (see export method)
         ratio :
             How much of the total data to use for training (0 to 1)
         K :
             How many eigenface space base vectors to keep in order to express each image
+        data_pkl :
+            Pickle serialised file that contains data (see export method)
+        target_pkl :
+            Pickle serialised file that contains label (see export method)
         """
         if data_pkl is not None:
             with open(data_pkl, 'rb') as f:
@@ -33,7 +33,7 @@ class faceClassifier():
             with open(target_pkl, 'rb') as f:
                 self.target = pkl.load(f)
         else:
-            self.target = None      # data vectors
+            self.target = None      # label (ground truth) vectors
         self.train_data = OD()      # maps sample index to data and label
         self.test_data = OD()       # maps sample index to data and label
         # how many eigenfaces to keep
