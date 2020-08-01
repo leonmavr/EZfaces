@@ -25,5 +25,5 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Run and evaluate all unit tests
       run: |
-        python3 tests/*.py
+        python tests/*.py
 
