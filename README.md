@@ -1,5 +1,5 @@
 # EZfaces
-Eigenfaces from scratch in Python.
+Eigenfaces from scratch in Python. 
 
 # Description
 
