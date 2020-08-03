@@ -52,3 +52,5 @@ cv2.imshow("Prediction", fc.vec2img(x_pred))
 cv2.waitKey(3000)
 cv2.destroyAllWindows()
 ```
+
+![demo](https://raw.githubusercontent.com/0xLeo/EZfaces/master/assets/demo_webcam.gif)
