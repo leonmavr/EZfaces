@@ -28,6 +28,11 @@ scipy 1.4.1
 scikit-image 0.16.2
 scikit-learn 0.22
 ```
+You can install them as follows:
+```
+cd <project_root>
+pip install -r requirements.txt
+```
 
 # Usage example
 1. Load new subject and predict from webcam
