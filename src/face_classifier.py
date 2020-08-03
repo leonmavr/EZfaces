@@ -113,7 +113,7 @@ class faceClassifier():
         cv2.destroyAllWindows()
 
 
-    def add_img_data(self, fpaths = [], from_webcam = False):
+    def add_img_data(self, fpaths: list = [], from_webcam: bool = False) -> int:
         """add_img_data. Adds data and their labels to existing database.
 
         Parameters
@@ -122,6 +122,11 @@ class faceClassifier():
             fpaths list of image files. If empty, they're ignored
         from_webcam : bool
             from_webcam if True, opens webcam and lets the user capture face data
+
+        Returns
+        -------
+        int
+            The label of the newly added subject.
         """
         assert len(self.target) != 0, "No labels have been generated!"
         # create new label for new subject
@@ -138,6 +143,7 @@ class faceClassifier():
         if from_webcam:
             self._read_from_webcam(new_label = target_new)
         self.data = np.array(self.data)
+        return self.target[-1]
 
 
     def train(self):
