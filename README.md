@@ -42,7 +42,7 @@ import cv2
 
 
 fc = faceClassifier()
-lbl_new = fc.add_img_data([], from_webcam=True)
+lbl_new = fc.add_img_data(from_webcam=True)
 fc.train()
 # take a snapshot from webcam
 x_novel = fc.webcam2vec()
