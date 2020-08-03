@@ -19,7 +19,7 @@ A tool for face recognition in Python. it implements [Turk and Pentland's paper]
 
 
 # Requirements
-Newer verisons than the ones below will possibly work too but the project has been tested in Python 3.7 and 3.8 with the following dependencies installed.
+Newer verisons than the ones below will possibly work too but the project has been tested in CI (see [workflows](https://github.com/0xLeo/EZfaces/tree/master/.github/workflows)) in Python 3.7 and 3.8 with the following dependencies installed.
 ```
 opencv-python 4.1.2.30
 numpy 1.17.4
