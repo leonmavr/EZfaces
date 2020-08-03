@@ -37,7 +37,7 @@ pip install -r requirements.txt
 # Usage example
 1. Load new subject and predict from webcam
 ```
-from face_classifier import faceClassifier
+from src.face_classifier import faceClassifier
 import cv2
 
 
@@ -47,7 +47,8 @@ fc.train()
 # take a snapshot from webcam
 x_novel = fc.webcam2vec()
 x_pred, lbl_pred = fc.classify(x_novel)
-print("The ID of the newly added subject is %d. The prediction from the webcam is %d" %(lbl_new, lbl_pred))
+print("The ID of the newly added subject is %d. The prediction from "
+        "the webcam is %d" %(lbl_new, lbl_pred))
 cv2.imshow("Prediction", fc.vec2img(x_pred))
 cv2.waitKey(3000)
 cv2.destroyAllWindows()
