@@ -6,7 +6,7 @@
 ![Python package](https://github.com/0xLeo/EZfaces/workflows/Python%20package/badge.svg)  
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)  
 
-A tool for face recognition in Python. it implements [Turk and Pentland's paper](https://sites.cs.ucsb.edu/~mturk/Papers/mturk-CVPR91.pdf) and is based on the [Olivetti faces dataset](https://scikit-learn.org/stable/modules/generated/sklearn.datasets.fetch_olivetti_faces.html). Some of its features are:
+A tool for face recognition in Python. it implements [Turk and Pentland's paper](https://sites.cs.ucsb.edu/~mturk/Papers/mturk-CVPR91.pdf). The notation follows my pdf notes [here](https://github.com/0xLeo/journal/tree/master/computer-vision/pca_eigenfaces/pdf). Finally, it is based on the [Olivetti faces dataset](https://scikit-learn.org/stable/modules/generated/sklearn.datasets.fetch_olivetti_faces.html). Some of its features are:
 * Load Olivetti faces to initialise dataset.
 * Load new subjects from file.
 * Read new subjects directly from webcam.
@@ -52,3 +52,5 @@ cv2.imshow("Prediction", fc.vec2img(x_pred))
 cv2.waitKey(3000)
 cv2.destroyAllWindows()
 ```
+
+![demo](https://raw.githubusercontent.com/0xLeo/EZfaces/master/assets/demo_webcam.gif)
