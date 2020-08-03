@@ -13,7 +13,8 @@ A tool for face recognition in Python. it implements [Turk and Pentland's paper]
 * Predict a novel face from file.
 * Predict novel face from webcam.
 * Export currently loaded dataset and load it later.
-* Benchmarking (classificaiton report) method.
+* Built-in benchmarking (classificaiton report) method.  
+
 **Note**: When you add a new subject, it is recommended to take several (5 or more) pictures of its face profile from slighly different small angles. 
 
 
