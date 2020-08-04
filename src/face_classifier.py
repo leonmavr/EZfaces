@@ -7,6 +7,7 @@ from matplotlib import pyplot as plt
 import pickle as pkl
 import os
 import time
+import glob
 
 
 class faceClassifier():
@@ -113,15 +114,15 @@ class faceClassifier():
         cv2.destroyAllWindows()
 
 
-    def add_img_data(self, fpaths: list = [], from_webcam: bool = False) -> int:
+    def add_img_data(self, dir_img: str = [], from_webcam: bool = False) -> int:
         """add_img_data. Adds data and their labels to existing database.
 
         Parameters
         ----------
-        fpaths : list
-            fpaths list of image files. If empty, they're ignored
+        dir_img : str
+            directory where image(s) of a subject are saved
         from_webcam : bool
-            from_webcam if True, opens webcam and lets the user capture face data
+            if True, opens webcam and lets the user capture face data
 
         Returns
         -------
@@ -129,6 +130,10 @@ class faceClassifier():
             The label of the newly added subject.
         """
         assert len(self.target) != 0, "No labels have been generated!"
+        # find all images in given folder
+        fpaths = glob.glob(os.path.join(dir_img, '*.png'))
+        fpaths += glob.glob(os.path.join(dir_img, '*.jpg'))
+        fpaths += glob.glob(os.path.join(dir_img, '*.bmp'))
         # create new label for new subject
         target_new = self.target[-1] + 1
         self.target = np.append(self.target, [target_new]*len(fpaths))
@@ -300,7 +305,7 @@ class faceClassifier():
             x_test, lbl = self.classify(x_actual)
             lbl_test.append(lbl)
             if imshow:
-                fig=plt.figure(figsize=(64, 64))
+                fig = plt.figure(figsize=(64, 64))
                 cols, rows = 2, 1
                 ax1 = fig.add_subplot(rows, cols, 1)
                 ax1.title.set_text('actual: %d' % test_data_lbl[1])

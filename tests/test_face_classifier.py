@@ -1,5 +1,4 @@
 import unittest
-
 import os
 import sys
 this_script_path = os.path.abspath(__file__)
@@ -25,9 +24,9 @@ class TestUM(unittest.TestCase):
 
 
     def test_train_with_subject(self):
-        fpaths_images = glob.glob(os.path.join(this_script_folder, 'images_yale', 'subject03*png'))
+        img_dir = os.path.join(this_script_folder, 'images_yale')
         fc = faceClassifier()
-        fc.add_img_data(fpaths_images)
+        fc.add_img_data(img_dir)
         # data stored as 64*64 row vectors
         self.assertEqual(fc.data.shape[1], 64*64)
         # 40 + 1 subjects
@@ -38,11 +37,9 @@ class TestUM(unittest.TestCase):
 
 
     def test_benchmark(self):
-        fpaths_images = glob.glob(os.path.join(this_script_folder, 'images_yale', 'subject03*png'))
-        if len(fpaths_images) == 0:
-            return
+        img_dir = os.path.join(this_script_folder, 'images_yale')
         fc = faceClassifier(ratio = .725)
-        fc.add_img_data(fpaths_images)
+        fc.add_img_data(img_dir)
         fc.benchmark()
         self.assertNotEqual(fc.classification_report, None)
         print(fc.classification_report)
@@ -50,9 +47,9 @@ class TestUM(unittest.TestCase):
 
 
     def test_export_import(self):
-        fpaths_images = glob.glob(os.path.join(this_script_folder, 'images_yale', 'subject03*png'))
+        img_dir = os.path.join(this_script_folder, 'images_yale')
         fc = faceClassifier()
-        fc.add_img_data(fpaths_images)
+        fc.add_img_data(img_dir)
         # write as pickle files
         fc.export()
 
