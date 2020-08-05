@@ -1,6 +1,21 @@
-import setuptools
+try:
+    from setuptools import setup
+except ImportError:
+    from distutils.core import setup
 
-with open("README.md", "r") as fh:
-    long_description = fh.read()
-
-# TODO: cont here https://packaging.python.org/tutorials/packaging-projects/
+setup(
+    name='EZfaces',
+    version='0.1',
+    description='Face recognition using Eigenfaces',
+    author='0xLeo',
+    author_email='0xleo.git@gmail.com',
+    url='https://github.com/0xLeo/EZfaces',
+    packages=['src'],
+    include_package_data=True,
+    install_requires=['opencv-python',
+        'scikit-learn',
+        'matplotlib',
+        'pickle',
+        'numpy'],
+    zip_safe=False,
+)
