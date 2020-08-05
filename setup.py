@@ -15,7 +15,6 @@ setup(
     install_requires=['opencv-python',
         'scikit-learn',
         'matplotlib',
-        'pickle',
         'numpy'],
     zip_safe=False,
 )
