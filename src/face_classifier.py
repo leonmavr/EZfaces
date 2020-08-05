@@ -114,7 +114,7 @@ class faceClassifier():
         cv2.destroyAllWindows()
 
 
-    def add_img_data(self, dir_img: str = [], from_webcam: bool = False) -> int:
+    def add_img_data(self, dir_img: str = "", from_webcam: bool = False) -> int:
         """add_img_data. Adds data and their labels to existing database.
 
         Parameters
@@ -255,6 +255,8 @@ class faceClassifier():
         """ Opens webcam. The user can take a picture. Returns picture
         as data vector"""
         cap = cv2.VideoCapture(0)
+        print("Position your face in the green box.\n"
+                "Press p to capture a face picture.")
         while True:
             # Capture frame by frame
             _, frame = cap.read()
