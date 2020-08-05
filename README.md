@@ -18,8 +18,16 @@ A tool for face recognition in Python. it implements [Turk and Pentland's paper]
 **Note**: When you add a new subject, it is recommended to take several (5 or more) pictures of its face profile from slighly different small angles. 
 
 
-# Requirements
-Newer verisons than the ones below will possibly work too but the project has been tested in CI (see [workflows](https://github.com/0xLeo/EZfaces/tree/master/.github/workflows)) in Python 3.7 and 3.8 with the following dependencies installed.
+# Installation
+You can install them as follows:
+```
+cd <project_root>
+pip install .
+```
+Next, you can import the package as `import ezfaces` or its main class as `from ezfaces.face_classifier import faceClassifier`.  
+
+
+The project has been tested in CI (see [workflows](https://github.com/0xLeo/EZfaces/tree/master/.github/workflows)) in Python 3.7 and 3.8 with the following dependencies installed, but newer versions will also work:
 ```
 opencv-python 4.1.2.30
 numpy 1.17.4
@@ -28,16 +36,12 @@ scipy 1.4.1
 scikit-image 0.16.2
 scikit-learn 0.22
 ```
-You can install them as follows:
-```
-cd <project_root>
-pip install -r requirements.txt
-```
+
 
 # Usage example
 1. Load new subject and predict from webcam
 ```
-from src.face_classifier import faceClassifier
+from from ezfaces.face_classifier import faceClassifier
 import cv2
 
 
