@@ -19,7 +19,7 @@ A tool for face recognition in Python. it implements [Turk and Pentland's paper]
 
 
 # Installation
-You can install them as follows:
+You can install the package as follows:
 ```
 cd <project_root>
 pip install .
