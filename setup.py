@@ -10,7 +10,7 @@ setup(
     author='0xLeo',
     author_email='0xleo.git@gmail.com',
     url='https://github.com/0xLeo/EZfaces/archive/alpha.tar.gz',
-    packages=['src'],
+    packages=['ezfaces'],
     include_package_data=True,
     install_requires=['opencv-python',
         'scikit-learn',

@@ -3,9 +3,8 @@ import os
 import sys
 this_script_path = os.path.abspath(__file__)
 this_script_folder = os.path.dirname(this_script_path)
-sys.path.insert(1, os.path.join(this_script_folder, '..', 'src'))
+sys.path.insert(1, os.path.join(this_script_folder, '..', 'ezfaces'))
 from face_classifier import faceClassifier
-import glob
 import numpy as np
 
 
