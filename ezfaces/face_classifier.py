@@ -338,21 +338,8 @@ class faceClassifier():
         Returns
         -------
         Tuple[str, str]
-
-        """
-
-        """export. Exports all currents data vectors and labels as .pkl files
-
-        Parameters
-        ----------
-        dest_folder :
-            where to save the data and label pickle files
-
-        Returns
-        -------
-        Tuple[str, str]
-            tuple containing the path to exported data and label file respectively.
-            Empty tuple if  failure.
+            Tuple containing the path to exported data and label file respectively.
+            Empty string tuple if failure.
         """
         try:
             fpath_data = os.path.join(dest_folder, 'data.pkl')
