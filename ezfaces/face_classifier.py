@@ -9,6 +9,7 @@ import os
 import time
 import glob
 import itertools as it
+from typing import List, Tuple
 
 
 class faceClassifier():
@@ -326,29 +327,45 @@ class faceClassifier():
                     y_pred = lbl_test)
 
 
-    def export(self, dest_folder = '/tmp') -> bool:
+    def export(self, dest_folder = '/tmp') -> Tuple[str, str]:
+        """export.
+
+        Parameters
+        ----------
+        dest_folder :
+            dest_folder
+
+        Returns
+        -------
+        Tuple[str, str]
+
+        """
+
         """export. Exports all currents data vectors and labels as .pkl files
 
         Parameters
         ----------
         dest_folder :
-            where to save the pickle files 
+            where to save the data and label pickle files
 
         Returns
         -------
-        bool :
-            True if success, False if exception
+        Tuple[str, str]
+            tuple containing the path to exported data and label file respectively.
+            Empty tuple if  failure.
         """
         try:
-            with open(os.path.join(dest_folder, 'data.pkl'), 'wb') as f:
+            fpath_data = os.path.join(dest_folder, 'data.pkl')
+            fpath_lbl = os.path.join(dest_folder, 'target.pkl')
+            with open(fpath_data, 'wb') as f:
                 pkl.dump(self.data, f)
-            with open(os.path.join(dest_folder, 'target.pkl'), 'wb') as f:
+            with open(fpath_lbl, 'wb') as f:
                 pkl.dump(self.target, f)
-            print("Wrote data and target as .pkl at:\n%s" % dest_folder)
+            print("Wrote data and target as .pkl at:\n%s"
+                    % os.path.abspath(dest_folder))
+            return os.path.abspath(fpath_data), os.path.abspath(fpath_lbl)
         except Exception as e:
-            print(e)
-            return False
-        return True
+            return "", ""
 
 
     def grouper(self, inputs, n, fillvalue=None) -> list:
