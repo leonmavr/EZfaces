@@ -40,6 +40,8 @@ class faceClassifier():
         self.test_data = OD()       # maps sample index to data and label
         # how many eigenfaces to keep
         self.K = K
+        # how much training data to use as part of total data
+        self.ratio = ratio
         # MxK matrix - each row stores the coords of each image in the eigenface space
         self.W = None
         self.classification_report = None # obtained from benchmarking
@@ -153,7 +155,7 @@ class faceClassifier():
 
     def train(self):
         """ Find the coordinates of each training image in the eigenface space """
-        self._divide_dataset()
+        self._divide_dataset(ratio = self.ratio)
         # the matrix X to use for training
         X = np.array([v[0] for v in self.train_data.values()])
         # compute eig of MxN^2 matrix first instead of the N^2xN^2, N^2 >> M
