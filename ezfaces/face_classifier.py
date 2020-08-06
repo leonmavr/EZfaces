@@ -56,8 +56,8 @@ class faceClassifier():
     def __str__(self):
         M = len(self.data)
         return "Loaded %d samples in total.\n"\
-            "%.2f for training and %.2f for testing."\
-            % (M, self.ratio*M*100, (1-self.ratio)*M*100)
+            "%d for training and %d for testing."\
+            % (M, self.ratio*M, (1-self.ratio)*M)
 
 
     def _load_olivetti_data(self):
