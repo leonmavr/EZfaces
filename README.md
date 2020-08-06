@@ -38,8 +38,24 @@ scikit-learn 0.22
 ```
 
 
-# Usage example
-1. Load new subject and predict from webcam
+# Usage examples
+**1. Load new subject from folder**
+```
+from ezfaces.face_classifier import faceClassifier
+
+fc = faceClassifier()
+lbl_new = fc.add_img_data('tests/images_yale')
+print(fc)
+print("New subject\'s label is %d" % lbl_new)
+```
+Output:
+```
+Loaded 410 samples in total.
+348 for training and 61 for testing.
+New subject's label is 40
+```
+
+**2. Load new subject and predict from webcam**
 ```
 from from ezfaces.face_classifier import faceClassifier
 import cv2
@@ -59,3 +75,29 @@ cv2.destroyAllWindows()
 ```
 
 ![demo](https://raw.githubusercontent.com/0xLeo/EZfaces/master/assets/demo_webcam.gif)
+
+**3. Export and import dataset**
+```
+from ezfaces.face_classifier import faceClassifier
+
+
+fc = faceClassifier()
+data_file, lbl_file = fc.export('/tmp')
+
+# add some data
+lbl_new = fc.add_img_data('tests/images_yale')
+print(fc)
+
+# now let's say we made a mistake and don't like the new data
+fc = faceClassifier(data_pkl = data_file, target_pkl = lbl_file)
+print(fc)
+```
+Output:
+```
+Wrote data and target as .pkl at:
+/tmp
+Loaded 410 samples in total.
+348 for training and 61 for testing.
+Loaded 400 samples in total.
+340 for training and 60 for testing.
+```
