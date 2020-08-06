@@ -56,5 +56,10 @@ class TestUM(unittest.TestCase):
         self.assertEqual(len(np.unique(fc2.target)), 41)
 
 
+    def test_show_album(self):
+        fc = faceClassifier()
+        fc.show_album(wait_time=.1)
+
+
 if __name__ == '__main__':
     unittest.main()

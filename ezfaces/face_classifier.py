@@ -8,6 +8,7 @@ import pickle as pkl
 import os
 import time
 import glob
+import itertools as it
 
 
 class faceClassifier():
@@ -52,10 +53,9 @@ class faceClassifier():
 
     def __str__(self):
         M = len(self.data)
-        Mtrain = len(self.train_data)
-        Mtest = len(self.test_data)
         return "Loaded %d samples in total.\n"\
-            "%d for training and %d for testing." % (M, Mtrain, Mtest)
+            "%.2f for training and %.2f for testing."\
+            % (M, self.ratio*M*100, (1-self.ratio)*M*100)
 
 
     def _load_olivetti_data(self):
@@ -324,7 +324,19 @@ class faceClassifier():
                     y_pred = lbl_test)
 
 
-    def export(self, dest_folder = '/tmp'):
+    def export(self, dest_folder = '/tmp') -> bool:
+        """export. Exports all currents data vectors and labels as .pkl files
+
+        Parameters
+        ----------
+        dest_folder :
+            where to save the pickle files 
+
+        Returns
+        -------
+        bool :
+            True if success, False if exception
+        """
         try:
             with open(os.path.join(dest_folder, 'data.pkl'), 'wb') as f:
                 pkl.dump(self.data, f)
@@ -333,3 +345,46 @@ class faceClassifier():
             print("Wrote data and target as .pkl at:\n%s" % dest_folder)
         except Exception as e:
             print(e)
+            return False
+        return True
+
+
+    def grouper(self, inputs, n, fillvalue=None) -> list:
+        """Credits https://realpython.com/python-itertools/
+        >>> fc = faceClassifier()
+        >>> nums = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        >>> print(list(fc.grouper(nums, 4)))
+        [(1, 2, 3, 4), (5, 6, 7, 8), (9, 10, None, None)]
+        """
+        iters = [iter(inputs)] * n
+        return list(it.zip_longest(*iters, fillvalue=fillvalue))
+
+
+    def show_album(self, wait_time = 2.0):
+        """show_album. Shows all gathered subjects in a several
+        pages of 8x8 grids (photo "album").
+
+        Parameters
+        ----------
+        wait_time :
+            how long to wait between successive grid pages in sec
+        """
+        data_every_64 = self.grouper(self.data, 64)
+        lbl_every_64 = self.grouper(self.target, 64)
+        cols, rows = 8, 8
+        blank = np.zeros((64, 64), np.uint8)
+
+        for data, lbls in zip(data_every_64, lbl_every_64):
+            fig = plt.figure(figsize=(64, 64))
+            for i in range(1, cols*rows +1):
+                ax = fig.add_subplot(rows, cols, i)
+                try:
+                    plt.imshow(self.vec2img(data[i-1]))
+                    ax.title.set_text("%d" % lbls[i-1])
+                except:
+                    plt.imshow(blank)
+                    ax.title.set_text("blank")
+            plt.subplots_adjust(wspace = .6)
+            plt.show(block = False)
+            plt.pause(wait_time)
+            plt.close()
