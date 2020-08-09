@@ -101,3 +101,17 @@ Loaded 410 samples in total.
 Loaded 400 samples in total.
 340 for training and 60 for testing.
 ```
+
+
+**4. Show all loaded subjects**
+```
+from ezfaces.face_classifier import FaceClassifier
+
+
+fc = FaceClassifier()
+# add some adata
+lbl_new = fc.add_img_data('tests/images_yale')
+fc.show_album()
+```
+It will show the subjects in 8\*8 image grids as follows:
+![album](https://raw.githubusercontent.com/0xLeo/EZfaces/master/assets/show_album.png)
