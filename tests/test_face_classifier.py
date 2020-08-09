@@ -4,19 +4,19 @@ import sys
 this_script_path = os.path.abspath(__file__)
 this_script_folder = os.path.dirname(this_script_path)
 sys.path.insert(1, os.path.join(this_script_folder, '..', 'ezfaces'))
-from face_classifier import faceClassifier
+from face_classifier import FaceClassifier
 import numpy as np
 
 
 class TestUM(unittest.TestCase):
 
     def test_train_with_olivetti(self):
-        fc = faceClassifier()
+        fc = FaceClassifier()
         self.assertEqual(len(fc.data.shape), 2)
         # data stored as 64*64 row vectors
         self.assertEqual(fc.data.shape[1], 64*64)
         # Olivetti data contain 40 subjects
-        self.assertEqual(len(np.unique(fc.target)), 40)
+        self.assertEqual(len(np.unique(fc.labels)), 40)
         fc.train()
         # their coordinates in eigenface space as a matrix (.W)
         self.assertEqual(len(fc.W.shape), 2)
@@ -24,12 +24,12 @@ class TestUM(unittest.TestCase):
 
     def test_train_with_subject(self):
         img_dir = os.path.join(this_script_folder, 'images_yale')
-        fc = faceClassifier()
+        fc = FaceClassifier()
         fc.add_img_data(img_dir)
         # data stored as 64*64 row vectors
         self.assertEqual(fc.data.shape[1], 64*64)
         # 40 + 1 subjects
-        self.assertEqual(len(np.unique(fc.target)), 41)
+        self.assertEqual(len(np.unique(fc.labels)), 41)
         fc.train()
         # their coordinates in eigenface space as a matrix (.W)
         self.assertEqual(len(fc.W.shape), 2)
@@ -37,7 +37,7 @@ class TestUM(unittest.TestCase):
 
     def test_benchmark(self):
         img_dir = os.path.join(this_script_folder, 'images_yale')
-        fc = faceClassifier(ratio = .725)
+        fc = FaceClassifier(ratio = .725)
         fc.add_img_data(img_dir)
         fc.benchmark()
         self.assertNotEqual(fc.classification_report, None)
@@ -47,17 +47,17 @@ class TestUM(unittest.TestCase):
 
     def test_export_import(self):
         img_dir = os.path.join(this_script_folder, 'images_yale')
-        fc = faceClassifier()
+        fc = FaceClassifier()
         fc.add_img_data(img_dir)
         # write as pickle files
         fc.export()
 
-        fc2 = faceClassifier(data_pkl = '/tmp/data.pkl', target_pkl = '/tmp/target.pkl')
-        self.assertEqual(len(np.unique(fc2.target)), 41)
+        fc2 = FaceClassifier(data_pkl = '/tmp/data.pkl', target_pkl = '/tmp/labels.pkl')
+        self.assertEqual(len(np.unique(fc2.labels)), 41)
 
 
     def test_show_album(self):
-        fc = faceClassifier()
+        fc = FaceClassifier()
         fc.show_album(wait_time=.1)
 
 

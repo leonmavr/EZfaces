@@ -12,7 +12,7 @@ import itertools as it
 from typing import List, Tuple
 
 
-class faceClassifier():
+class FaceClassifier():
     def __init__(self, ratio = 0.85, K = 200, data_pkl = None, target_pkl = None):
         """__init__. Class constructor.
 
@@ -34,9 +34,9 @@ class faceClassifier():
             self.data = None        # data vectors
         if target_pkl is not None:
             with open(target_pkl, 'rb') as f:
-                self.target = pkl.load(f)
+                self.labels = pkl.load(f)
         else:
-            self.target = None      # label (ground truth) vectors
+            self.labels = None      # label (ground truth) vectors
         self.train_data = OD()      # maps sample index to data and label
         self.test_data = OD()       # maps sample index to data and label
         # how many eigenfaces to keep
@@ -48,7 +48,7 @@ class faceClassifier():
         self.classification_report = None # obtained from benchmarking
         # mean needed for reconstruction
         self._mean = np.zeros((1, 64*64), dtype=np.float32)
-        if self.data is None and self.target is None: # no pre-loaded data
+        if self.data is None and self.labels is None: # no pre-loaded data
             self._load_olivetti_data()
         self._TRAIN_SAMPLE = 1
         self._PRED_SAMPLE = 0
@@ -67,7 +67,7 @@ class faceClassifier():
         # data as floating vectors of length 64^2, ranging from 0 to 1
         self.data = np.array(data)
         # subject labels (sequential from to 0 to ...)
-        self.target = target
+        self.labels = target
 
 
     def _record_mean(self):
@@ -112,7 +112,7 @@ class faceClassifier():
                 cv2.destroyWindow("new data")
                 x = self.img2vec(im_cropped)
                 self.data = np.array([*self.data, np.array(x, dtype=np.float32)])
-                self.target = np.append(self.target, new_label)
+                self.labels = np.append(self.labels, new_label)
         cap.release()
         cv2.destroyAllWindows()
 
@@ -132,14 +132,14 @@ class faceClassifier():
         int
             The label of the newly added subject.
         """
-        assert len(self.target) != 0, "No labels have been generated!"
+        assert len(self.labels) != 0, "No labels have been generated!"
         # find all images in given folder
         fpaths = glob.glob(os.path.join(dir_img, '*.png'))
         fpaths += glob.glob(os.path.join(dir_img, '*.jpg'))
         fpaths += glob.glob(os.path.join(dir_img, '*.bmp'))
         # create new label for new subject
-        target_new = self.target[-1] + 1
-        self.target = np.append(self.target, [target_new]*len(fpaths))
+        target_new = self.labels[-1] + 1
+        self.labels = np.append(self.labels, [target_new]*len(fpaths))
         # convert image to 64*64 data vector (ranging from 0 to 1)
         for i, f in enumerate(fpaths):
             im = cv2.imread(f)
@@ -185,11 +185,11 @@ class faceClassifier():
         # {index: (data_vector, data_label)}, index starts from 0 
         self.train_data = OD(                                       # ordered dict
                 dict(zip(train_inds,                                # keys
-            zip(self.data[train_inds,:], self.target[train_inds]))) # vals
+            zip(self.data[train_inds,:], self.labels[train_inds]))) # vals
                 )
         self.test_data = OD(                                        # ordered dict
                 dict(zip(test_inds,                                 # keys
-            zip(self.data[test_inds,:], self.target[test_inds])))   # vals
+            zip(self.data[test_inds,:], self.labels[test_inds])))   # vals
                 )
 
 
@@ -246,7 +246,6 @@ class faceClassifier():
         if not len(im.shape) == 2:
             raise RuntimeError("Provide a greyscale image as input.")
         x = np.asarray(cv2.resize(im, dsize=(64,64)), np.float32).ravel()
-        import pdb; pdb.set_trace()
         x /= 255
         x = np.reshape(x, self._mean.shape)
         x -= self._mean
@@ -343,11 +342,11 @@ class faceClassifier():
         """
         try:
             fpath_data = os.path.join(dest_folder, 'data.pkl')
-            fpath_lbl = os.path.join(dest_folder, 'target.pkl')
+            fpath_lbl = os.path.join(dest_folder, 'labels.pkl')
             with open(fpath_data, 'wb') as f:
                 pkl.dump(self.data, f)
             with open(fpath_lbl, 'wb') as f:
-                pkl.dump(self.target, f)
+                pkl.dump(self.labels, f)
             print("Wrote data and target as .pkl at:\n%s"
                     % os.path.abspath(dest_folder))
             return os.path.abspath(fpath_data), os.path.abspath(fpath_lbl)
@@ -376,7 +375,7 @@ class faceClassifier():
             how long to wait between successive grid pages in sec
         """
         data_every_64 = self.grouper(self.data, 64)
-        lbl_every_64 = self.grouper(self.target, 64)
+        lbl_every_64 = self.grouper(self.labels, 64)
         cols, rows = 8, 8
         blank = np.zeros((64, 64), np.uint8)
 

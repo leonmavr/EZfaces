@@ -24,7 +24,7 @@ You can install the package as follows:
 cd <project_root>
 pip install .
 ```
-Next, you can import the package as `import ezfaces` or its main class as `from ezfaces.face_classifier import faceClassifier`.  
+Next, you can import the package as `import ezfaces` or its main class as `from ezfaces.face_classifier import FaceClassifier`.  
 
 
 The project has been tested in CI (see [workflows](https://github.com/0xLeo/EZfaces/tree/master/.github/workflows)) in Python 3.7 and 3.8 with the following dependencies installed, but newer versions will also work:
@@ -41,9 +41,9 @@ scikit-learn 0.22
 # Usage examples
 **1. Load new subject from folder**
 ```
-from ezfaces.face_classifier import faceClassifier
+from ezfaces.face_classifier import FaceClassifier
 
-fc = faceClassifier()
+fc = FaceClassifier()
 lbl_new = fc.add_img_data('tests/images_yale')
 print(fc)
 print("New subject\'s label is %d" % lbl_new)
@@ -57,11 +57,11 @@ New subject's label is 40
 
 **2. Load new subject and predict from webcam**
 ```
-from from ezfaces.face_classifier import faceClassifier
+from from ezfaces.face_classifier import FaceClassifier
 import cv2
 
 
-fc = faceClassifier()
+fc = FaceClassifier()
 lbl_new = fc.add_img_data(from_webcam=True)
 fc.train()
 # take a snapshot from webcam
@@ -78,10 +78,10 @@ cv2.destroyAllWindows()
 
 **3. Export and import dataset**
 ```
-from ezfaces.face_classifier import faceClassifier
+from ezfaces.face_classifier import FaceClassifier
 
 
-fc = faceClassifier()
+fc = FaceClassifier()
 data_file, lbl_file = fc.export('/tmp')
 
 # add some data
@@ -89,7 +89,7 @@ lbl_new = fc.add_img_data('tests/images_yale')
 print(fc)
 
 # now let's say we made a mistake and don't like the new data
-fc = faceClassifier(data_pkl = data_file, target_pkl = lbl_file)
+fc = FaceClassifier(data_pkl = data_file, target_pkl = lbl_file)
 print(fc)
 ```
 Output:
