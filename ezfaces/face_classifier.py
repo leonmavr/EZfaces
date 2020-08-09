@@ -100,6 +100,7 @@ class FaceClassifier():
             min_shape = min(grey.shape)
             cv2.rectangle( frame, (0,0), (int(3*min_shape/4),
                 int(3*min_shape/4)), (0,255,0), thickness = 4)
+            cv2.namedWindow('frame', flags=cv2.WINDOW_GUI_NORMAL)
             cv2.imshow('frame',frame)
             k = cv2.waitKey(10) & 0xff
             if k == ord('q'):
@@ -107,9 +108,10 @@ class FaceClassifier():
             elif k == ord('p'):
                 im_cropped = grey[:int(3*min_shape/4), :int(3*min_shape/4)]
                 cv2.destroyAllWindows()
+                cv2.namedWindow('new data', flags=cv2.WINDOW_GUI_NORMAL)
                 cv2.imshow("new data", im_cropped)
                 cv2.waitKey(1500)
-                cv2.destroyWindow("new data")
+                cv2.destroyAllWindows()
                 x = self.img2vec(im_cropped)
                 self.data = np.array([*self.data, np.array(x, dtype=np.float32)])
                 self.labels = np.append(self.labels, new_label)
@@ -274,6 +276,7 @@ class FaceClassifier():
             elif k == ord('p'):
                 im_cropped = grey[:int(3*min_shape/4), :int(3*min_shape/4)]
                 cv2.destroyAllWindows()
+                cv2.namedWindow("new data", flags=cv2.WINDOW_GUI_NORMAL)
                 cv2.imshow("new data", im_cropped)
                 cv2.waitKey(1500)
                 cv2.destroyWindow("new data")
