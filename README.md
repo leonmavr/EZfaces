@@ -57,7 +57,7 @@ New subject's label is 40
 
 **2. Load new subject and predict from webcam**
 ```
-from from ezfaces.face_classifier import FaceClassifier
+from ezfaces.face_classifier import FaceClassifier
 import cv2
 
 
