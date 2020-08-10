@@ -9,7 +9,7 @@ import os
 import time
 import glob
 import itertools as it
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 
 class FaceClassifier():
@@ -42,6 +42,8 @@ class FaceClassifier():
         # how many eigenfaces to keep
         self.K = K
         # how much training data to use as part of total data
+        if not 0 < ratio <= 1:
+            raise ValueError('Provide a training/total data ratio from 0 to 1 inclusive.')
         self.ratio = ratio
         # MxK matrix - each row stores the coords of each image in the eigenface space
         self.W = None
@@ -84,7 +86,7 @@ class FaceClassifier():
         self.data = np.matmul(C, self.data)
 
 
-    def _read_from_webcam(self, new_label, stream = 0):
+    def _read_from_webcam(self, new_label, stream: Union[str, int] = 0):
         """Takes face snapshots from webcam. Pass the new label of the subject
         being photographed."""
         print("Position your face in the green box.\n"
@@ -158,7 +160,7 @@ class FaceClassifier():
 
     def train(self):
         """ Find the coordinates of each training image in the eigenface space """
-        self._divide_dataset(ratio = self.ratio)
+        self._divide_dataset()
         # the matrix X to use for training
         X = np.array([v[0] for v in self.train_data.values()])
         # compute eig of MxN^2 matrix first instead of the N^2xN^2, N^2 >> M
@@ -175,16 +177,14 @@ class FaceClassifier():
         self.W = self.W[:, :self.K]
 
 
-    def _divide_dataset(self, ratio = 0.85):
+    def _divide_dataset(self):
         """Divides dataset in training and test (prediction) data"""
-        if not 0 < ratio < 1:
-            raise RuntimeError("Provide a ratio between 0 and 1.")
-        training_or_test = [self._random_binary(ratio) for _ in self.data]
+        training_or_test = [self._random_binary(self.ratio) for _ in self.data]
         self._subtract_mean()
 
         train_inds = [i for i,t in enumerate(training_or_test) if t == self._TRAIN_SAMPLE]
         test_inds = [i for i,t in enumerate(training_or_test) if t == self._PRED_SAMPLE]
-        # {index: (data_vector, data_label)}, index starts from 0 
+        # {index: (data_vector, data_label)}, index starts from 0
         self.train_data = OD(                                       # ordered dict
                 dict(zip(train_inds,                                # keys
             zip(self.data[train_inds,:], self.labels[train_inds]))) # vals
@@ -209,7 +209,7 @@ class FaceClassifier():
         return self.test_data[test_ind] # data, label
 
 
-    def classify(self, x_new:np.array) -> tuple:
+    def classify(self, x_new: np.ndarray) -> tuple:
         """classify. Classify an input data vector.
 
         Parameters
@@ -236,8 +236,19 @@ class FaceClassifier():
                 self.train_data[train_inds[np.argmin(dists)]][1]) # label
 
 
-    def vec2img(self, x:list):
-        """Converts an 1D data vector stored in the class to image."""
+    def vec2img(self, x: list) -> np.ndarray:
+        """vec2img. Converts an 1D data vector stored in the class to image.
+
+        Parameters
+        ----------
+        x : list
+            0 mean float vector of length 64^2
+
+        Returns
+        -------
+        np.ndarray
+            the input vector 2D uint8 64x64 image
+        """
         x = np.array(x) + self._mean
         x = np.reshape(255*x, (64,64))
         return np.asarray(x, np.uint8)
@@ -269,7 +280,7 @@ class FaceClassifier():
             min_shape = min(grey.shape)
             cv2.rectangle( frame, (0,0), (int(3*min_shape/4),
                 int(3*min_shape/4)), (0,255,0), thickness = 4)
-            cv2.imshow('frame',frame)
+            cv2.imshow('frame', frame)
             k = cv2.waitKey(10) & 0xff
             if k == ord('q'):
                 break
@@ -329,12 +340,12 @@ class FaceClassifier():
                     y_pred = lbl_test)
 
 
-    def export(self, dest_folder = '/tmp') -> Tuple[str, str]:
-        """export.
+    def export(self, dest_folder: str = '/tmp') -> Tuple[str, str]:
+        """export. Exports the data and labels as serialised files.
 
         Parameters
         ----------
-        dest_folder :
+        dest_folder : str
             dest_folder
 
         Returns
